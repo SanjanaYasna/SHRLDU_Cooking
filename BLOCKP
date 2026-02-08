@@ -22,13 +22,15 @@
 
 (SETF (GET 'TA-EXISTS 'THEOREM) '(THANTE (X) (\#EXISTS (THV X)) (THSUCCEED)))
 
+; allow BELLPEPPER to be supportable too
 (SETF (GET 'TA-SUPP 'THEOREM)
 	 '(THANTE (X Y Z)
-		 (\#AT (THV X) (THV Y))
-		 (THCOND ((THVSETQ (THNV Z) (SUPPORT (THV Y) (SIZE (THV X)) (THV X)))
-			  (THCOND ((THGOAL (\#MANIP (THV Z)))
-				   (THGOAL (\#SHAPE (THV Z) \#RECTANGULAR)))
-				  ((THSUCCEED)))
+    (\#AT (THV X) (THV Y))
+    (THCOND ((THVSETQ (THNV Z) (SUPPORT (THV Y) (SIZE (THV X)) (THV X)))
+             (THCOND ((THGOAL (\#MANIP (THV Z)))
+                      (THOR (THGOAL (\#SHAPE (THV Z) \#RECTANGULAR))
+                           (THGOAL (\#SHAPE (THV Z) \#ROUND))))
+                    ((THSUCCEED)))
 			  (THASSERT (\#SUPPORT (THV Z) (THV X)))
 			  (THCOND ((THGOAL (\#CLEARTOP (THV Z)))
 				   (THERASE (\#CLEARTOP (THV Z))))
@@ -124,14 +126,14 @@
 (SETF (GET 'TC-FINDSPACE 'THEOREM)
 	 '(THCONSE (SURF SIZE OBJ SPACE)
 		  (\#FINDSPACE (THV SURF) (THV SIZE) (THV OBJ) (THV SPACE))
-		  (THOR (AND (NOT (MEMQ (THV SURF) '(:POT :TABLE)))
+		  (THOR (AND (NOT (MEMQ (THV SURF) '(:POT :STOVETOP)))
 			     (NOT (GET '\#NOCLEAR 'THASSERTION))
 			     (THSETQ (THNV SPACE) (FINDSPACE 'CENTER
 							(THV SURF)
 							(THV SIZE)
 							(THV OBJ))))
 			(AND (OR (EQ (THV SURF) ':POT)
-				 (AND (NOT (EQ (THV SURF) ':TABLE))
+				 (AND (NOT (EQ (THV SURF) ':STOVETOP))
 				      (GET '\#NOCLEAR
 					   'THASSERTION)))
 			     (THSETQ (THNV SPACE) (FINDSPACE 'PACK
@@ -151,7 +153,7 @@
 		  (THCOND ((NULL (THV X)))
 			  ((ATOM (THV X))
 			   (MEMORY)
-			   (THGOAL (\#FINDSPACE :TABLE (THEV (SIZE (THV X))) (THV X) (THNV Y))
+			   (THGOAL (\#FINDSPACE :STOVETOP (THEV (SIZE (THV X))) (THV X) (THNV Y))
 				   (THUSE TC-FINDSPACE))
 			   (THGOAL (\#PUT (THV X) (THV Y)) (THNODB) (THUSE TC-PUT))
 			   (MEMOREND (\#GET-RID-OF (THV EV) (THV X))))
@@ -300,10 +302,12 @@
 						     (THGOAL (\#ON (THV Z) (THV Y))
 							     (THUSE TC-ON))))))
 
+;allow peppers to be backed, ie salmon packed in pepper
 (SETF (GET 'TC-PACK 'THEOREM)
 	 '(THCONSE (OBJ SURF BLOCKS PYR X Y)
 		  (\#PACK (THV OBJ) (THV SURF))
 		  (OR (THVSETQ (THNV BLOCKS) (PACKO (THV OBJ) '\#BLOCK)) T)
+		  (OR (THVSETQ (THNV BLOCKS) (PACKO (THV OBJ) '\#BELLPEPPER)) T)
 		  (OR (THVSETQ (THNV PYR) (PACKO (THV OBJ) '\#PYRAMID)) T)
 		  GO
 		  (THCOND ((NULL (THV BLOCKS))
@@ -354,7 +358,7 @@
 	 '(THCONSE (X)
 		  (\#PHYSOB (THV X))
 		  (THOR (THGOAL (\#MANIP (THV X)))
-			(THAMONG (THV X) '(:POT :TABLE :HAND)))))
+			(THAMONG (THV X) '(:POT :STOVETOP :HAND)))))
 
 (SETF (GET 'TC-PICKUP 'THEOREM)
 	 '(THCONSE (X (WHY (EV)) EV)
@@ -460,7 +464,7 @@
 				(THGOAL (\#IS (THV X) \#STACK))))
 		  GO
 		  (THGOAL (\#SUPPORT (THNV X) (THV Y)))
-		  (THCOND ((MEMQ (THV X) '(:TABLE :POT)))
+		  (THCOND ((MEMQ (THV X) '(:STOVETOP :POT)))
 			  ((THSETQ (THNV Y) (THV X)) (THGO GO)))
 		  (THSETQ (THNV X) (MAKESYM 'STACK))
 		  (THASSERT (\#IS (THV X) \#STACK))
@@ -489,13 +493,15 @@
 			  (COND ((NULL (THV X)) 3) (2))
 			  '(THV Y)
 			  '(Y)
-			  '(THOR (THAND (THGOAL (\#IS (THV Y) \#BLOCK))
-					      (THNOT (THGOAL (\#SUPPORT (THV Y) ?))))
-				       (THGOAL (\#IS (THV Y) \#BLOCK)))
+			  '(THOR (THAND (THOR (THGOAL (\#IS (THV Y) \#BLOCK)) (THGOAL (\#IS (THV Y) \#BELLPEPPER)))
+                    (THNOT (THGOAL (\#SUPPORT (THV Y) ?))))
+                    (THOR (THGOAL (\#IS (THV Y) \#BLOCK))
+                    (THGOAL (\#IS (THV Y) \#BELLPEPPER))))
 			  '(NOT (EQ (THV X) (THV Y))))
 		    THALIST)))))
   (COND ((THVSETQ (THNV PYR) (PACKO (THV X) '\#PYRAMID)) (NULL (CDR (THV PYR)))) (T))
-  (THVSETQ (THNV BLOCKS) (CONS ':TABLE (PACKO (THV X) '\#BLOCK)))
+  (THVSETQ (THNV BLOCKS) (CONS ':STOVETOP (SHRDLU-UNION (PACKO (THV X) '\#BLOCK)
+                                 (PACKO (THV X) '\#BELLPEPPER))))
   (MEMORY)
   GO
   (THCOND ((CDR (THV BLOCKS)) (THGOAL (\#PUTON (THEV (CADR (THV BLOCKS))) (THEV (CAR (THV BLOCKS))))

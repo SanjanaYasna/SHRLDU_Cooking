@@ -251,7 +251,7 @@
 		   (TERPRI))
 		(PRINT (CDDR 0A)))
 
-(DEFUN DTABLE (L) 
+(DEFUN DSTOVETOP (L) 
        (PRINT =LINE)
        (MAPC '(LAMBDA (X) 
 		      (PRINTC (TAB 5.) X (TAB 22.) '= (EVAL X))

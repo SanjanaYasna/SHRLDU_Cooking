@@ -372,7 +372,7 @@
 	(NOT (MEMQ (CAR NODE) CANDIDATES))
 								       ;"WHAT") OR OTHER NODES WITHOUT HEAD NOUNS ARE
 	(COND ((EQ PRONOUN 'IT)
-								       ;NOT SUITABLE FOR REFERENTS  MAKE SURE THAT NODE
+								       ;NOT SUISTOVETOP FOR REFERENTS  MAKE SURE THAT NODE
 	       (AND (ISQ NODE NS) (NOT (ISQ NODE PRONG))))
 								       ;HASN'T ALREADY BEEN USED AS
 	      (ELSE (ISQ NODE NPL)))
@@ -568,7 +568,7 @@
 								       ; DON'T USE FAKEY ANSWER NAME
 	    (GETR 'HEAD C)
 								       ;NODES FOR REFERENCE  QUEST
-	    DISCOURSE;NODES ARE NOT SUITABLE
+	    DISCOURSE;NODES ARE NOT SUISTOVETOP
 	    (SETQ BACKREF (CONS (CAR C) BACKREF)))
 								       ;REFERENTS SAVE THIS NG AWAY
        (SMSET (MAPBLAND #'SMNG3 SM))) 
@@ -939,7 +939,7 @@
 (DEFUN SMCL-MODIFIERS (WORD-BEING-INTERPRETED) 
        (DECLARE (SPECIAL WORD-BEING-INTERPRETED))
 								       ;AS IN CONSTITUENT
-       ;; THIS PROCEDURE IS BASICLY ONE LARGE DISPATCH TABLE WHICH
+       ;; THIS PROCEDURE IS BASICLY ONE LARGE DISPATCH STOVETOP WHICH
        ;;ARRANGES THAT THE PROPER KIND OF PROCESSING HAPPEN TO THE
        ;;APPROPRIATE CONSTITUENT.  SOME SHOULD BE IGNORED SINCE THEY
        ;;HAVE ALREADY BEEN DEALT WITH AND OTHERS SHOULD BE EVALUATED
@@ -1022,7 +1022,7 @@
 			   CLAUSES))
 								       ;one value???
 	     (COND ((ISQ (MOVE-PT H DF) TIME)
-								       ;dispatch table to match the appropriate action
+								       ;dispatch STOVETOP to match the appropriate action
 		       ;with each binder  move to the first word of the
 		       ;clause (to the binder) and check for the
 								       ;feature time

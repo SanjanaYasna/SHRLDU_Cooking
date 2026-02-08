@@ -9,7 +9,7 @@
 
 (DEFUN ABSVAL (X) (COND ((MINUSP X) (MINUS X)) (X)))
 
-(DEFUN ATAB (X) (OR (ASSQ X ATABLE) (ERT ATABLE)))
+(DEFUN ATAB (X) (OR (ASSQ X ASTOVETOP) (ERT ASTOVETOP)))
 
 (DEFUN CLEAR
        (LOC SIZE OBJ)
@@ -23,7 +23,7 @@
 				LOC
 				SIZE))
 		  (RETURN NIL))
-	     (SETQ W ATABLE)
+	     (SETQ W ASTOVETOP)
 	GO   (COND ((NULL W) (RETURN LOC))
 		   ((MEMQ (CAAR W) OBJ))
 		   ((AND (< (CAR LOC) (+ (CAR (SETQ X1 (CADAR W)))
@@ -54,7 +54,7 @@
  (PROG (XYMAX XYMIN N V X1 X2 FINDLEVEL)
        (SETQ OBJ (LISTIFY OBJ))
        (AND (MEMQ SURF OBJ) (RETURN NIL))
-       (COND ((EQ SURF ':TABLE) (SETQ XYMIN '(0 0))
+       (COND ((EQ SURF ':STOVETOP) (SETQ XYMIN '(0 0))
 				       (SETQ XYMAX '(1200 1200))
 				       (SETQ FINDLEVEL 0)
 				       (GO ON))
@@ -172,7 +172,7 @@
 					    YL)))
 			   ((MEMQ (CAR X) XO) (THROW 'GROW-DONE NIL))
 			   ((SETQ YO (CONS (CAR X) YO))))))
-	     ATABLE))))
+	     ASTOVETOP))))
 	 (RETURN NIL)))
   GO   (COND ((= (SETQ GROW (MIN (CAAR XL) (CAAR XH) (CAAR YL) (CAAR YH)))
 		  2000)
@@ -226,8 +226,8 @@
 (DEFUN OCCUPIER
        (X Y Z)
        (PROG (W X1 X2)
-	     (COND ((MINUSP Z) (RETURN ':TABLE)))
-	     (SETQ W ATABLE)
+	     (COND ((MINUSP Z) (RETURN ':STOVETOP)))
+	     (SETQ W ASTOVETOP)
 	GO   (COND ((NULL W) (RETURN NIL))
 		   ((AND (< (- (CAR (SETQ X1 (CADAR W))) 1)
 				X
@@ -281,7 +281,7 @@
 	      (CONS (CAR LIST) (PACKORD X SIZE (CDR LIST))))
 	     ((CONS (LIST SIZE X) LIST))))
 (DEFUN SIZE (X) (COND ((EQ X ':POT) '(400 400 300))
-		      ((EQ X ':TABLE) '(1200 1200 1200))
+		      ((EQ X ':STOVETOP) '(1200 1200 1200))
 		      ((EQ X ':HAND) '(0 0 0))
 		      ((ATOM X) (CADDR (ATAB X)))
 		      (X)))
@@ -307,7 +307,7 @@
 					    (LIST (LIST 'X
 							'THUNASSIGNED)
 						  (LIST 'Y (CAR X))))))))))
-  ATABLE)
+  ASTOVETOP)
 )
 
 
@@ -315,7 +315,7 @@
 
 (DEFUN SUPPORT
        (LOC SIZE X)
-       (COND ((EQ (CADDR LOC) 0) ':TABLE)
+       (COND ((EQ (CADDR LOC) 0) ':STOVETOP)
 	     ((SETQ LOC (OCCUPIER (+ (CAR LOC) (DIV2 (CAR SIZE)))
 				  (+ (CADR LOC) (DIV2 (CADR SIZE)))
 				  (- (CADDR LOC) 1)))
