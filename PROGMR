@@ -35,7 +35,7 @@
       ;;;   a list of smnfns which will
       ;;;    be broken at (before calling)
       ) 
-
+
 (DEFUN-FEXPR CALLSM (SEMANTIC-EXPRESSION) 
        (PROG (RESULT MPLNR-TIME SM-TTIME GC SMNFN) 
 	     (SETQ SMNFN (CAR SEMANTIC-EXPRESSION))
@@ -74,7 +74,7 @@
 			(MEMQ SMNFN SMNBREAKS))
 		    (ERT)))
 	     (RETURN RESULT))) 
-
+
 (DEFUN-FEXPR MOVE-PT (L) 
        (PROG (XX YY L2 EXEC SAVE) 
 	     (SETQ EXEC L)

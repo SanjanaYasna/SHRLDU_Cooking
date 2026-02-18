@@ -7,7 +7,7 @@
 	(TERPRI))
 
 (DEFUN GRASP (X)
-	(PRINC "~GRASPING BLOCK ")
+	(PRINC "~GRASPING OBJECT ")
 	(PRINC X)
 	(PRINC "~")
 	(TERPRI))
@@ -17,7 +17,17 @@
 	(TERPRI))
 
 (DEFUN BLINK (X)
-	(PRINC "~CHOOSING BLOCK ")
+	(PRINC "~CHOOSING OBJECT ")
 	(PRINC X)
 	(PRINC "~")
 	(TERPRI))
+
+;; Helper function for chopping action
+(DEFUN CHOP (KNIFE OBJ)
+	(PRINC "~CHOPPING ")
+	(PRINC OBJ)
+	(PRINC " WITH ")
+	(PRINC KNIFE)
+	(PRINC "~")
+	(TERPRI)
+	T)

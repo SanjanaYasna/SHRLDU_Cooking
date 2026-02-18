@@ -814,18 +814,122 @@
 
 (THADD 'TC-PHYSOB NIL)
 
-(DEFUN SHRDLU-UNION (A B) (PROG NIL
-		    UP	 (COND ((NULL A) (RETURN B))
-			       ((MEMQ (CAR A) B))
-			       ((SETQ B (CONS (CAR A) B))))
-			 (SETQ A (CDR A))
-			 (GO UP)))
+; 1 arg version
+
+(SETF (GET 'TC-CHOP 'THEOREM)
+  '(THCONSE (KNIFE OBJ BOARD NEWNAME OLDTYPE (WHY (EV)) EV)
+    (\#CHOP (THV KNIFE) (THV OBJ))
+	; FIRST: Verify knife is actually a knife
+    (THNOT (THGOAL (\#IS (THV KNIFE) \#KNIFE))
+           (DPRINT2 'CANNOT 'CHOP 'WITH (THV KNIFE))
+           (THFAIL))
+    ; SECOND: Verify object is onion or bellpepper, NOT a knife
+    (THNOT (THGOAL (\#IS (THV OBJ) \#KNIFE))
+           (DPRINT2 'CANNOT 'CHOP 'A 'KNIFE)
+           (THFAIL))
+    ; Verify object is choppable and determine type
+    (THCOND ((THGOAL (\#IS (THV OBJ) \#ONION))
+             (THSETQ (THNV OLDTYPE) '\#ONION)
+             (THSETQ (THNV NEWNAME) '\#CHOPPEDONION))
+            ((THGOAL (\#IS (THV OBJ) \#BELLPEPPER))
+             (THSETQ (THNV OLDTYPE) '\#BELLPEPPER)
+             (THSETQ (THNV NEWNAME) '\#CHOPPEDBELLPEPPER))
+            ((THFAIL)))
+	(MEMORY)
+	(DPRINT2 'CHOPPING (THV OBJ) 'WITH (THV KNIFE))
+    ; Find or place object on chopping board
+    (THCOND ((THGOAL (\#SUPPORT (THNV BOARD) (THV OBJ)))
+             (THGOAL (\#IS (THV BOARD) \#CHOPPINGBOARD)))
+            ((THGOAL (\#CHOOSE (THNV BOARD) 
+                              (THNV BOARD) 
+                              '(((THGOAL (\#IS (THV *) \#CHOPPINGBOARD)))))
+                     (THUSE TC-CHOOSE))
+             (THGOAL (\#PUTON (THV OBJ) (THV BOARD)) (THUSE TC-PUTON))))
+    ; Clear the knife and grasp it
+    (THGOAL (\#CLEARTOP (THV KNIFE)) (THUSE TC-CLEARTOP))
+    (THGOAL (\#PICKUP (THV KNIFE)) (THUSE TC-PICKUP))
+    ; Move knife to object and perform chopping
+    (THGOAL (\#MOVEHAND (THEV (TOPCENTER (THV OBJ)))) 
+            (THNODB) (THUSE TC-MOVEHAND))
+    ; Execute chopping action
+    (PRINT (LIST 'CHOPPING (THV OBJ)))
+    (THCOND (DOIT (CHOP (THV KNIFE) (THV OBJ)))
+            ((THSETQ PLAN (CONS (LIST 'CHOP 
+                                     (LIST 'QUOTE (THV KNIFE))
+                                     (LIST 'QUOTE (THV OBJ)))
+                               PLAN))))
+    ; Erase old type
+    (PRINT (LIST 'ERASING (THV OLDTYPE) 'FROM (THV OBJ)))
+    (THERASE (\#IS (THV OBJ) (THV OLDTYPE)))
+    ; Assert new properties
+    (PRINT (LIST 'ASSERTING (THV NEWNAME) 'FOR (THV OBJ)))
+    (THASSERT (\#IS (THV OBJ) \#CHOPPED))
+    (THASSERT (\#IS (THV OBJ) (THV NEWNAME)))
+    (THASSERT (\#NAME (THV OBJ) (THV NEWNAME)))
+    ; Print confirmation
+    (PRINT (LIST 'RENAMED (THV OBJ) 'TO (THV NEWNAME)))
+    ; Release the knife
+    (THGOAL (\#UNGRASP) (THNODB) (THUSE TC-UNGRASP))
+	(DPRINT2 'THE (THV OBJ) 'IS 'NOW 'A (THV NEWNAME))
+    (MEMOREND (\#CHOP (THV EV) (THV KNIFE) (THV OBJ)))))
+
+;; Define the new object types so SHRDLU recognizes them
+(SETF (GET '\#CHOPPEDONION 'PROPDEFINE) T)
+(SETF (GET '\#CHOPPEDBELLPEPPER 'PROPDEFINE) T)
+
+;; Add dictionary entries for the chopped objects
+(DEFS \#CHOPPEDONION
+    NAMEPRINT (CHOPPEDONION)
+    FEATURES (NOUN))
+
+(DEFS \#CHOPPEDBELLPEPPER
+    NAMEPRINT (CHOPPEDBELLPEPPER)
+    FEATURES (NOUN))
+
+;; Temporal CHOP Theorems (unchanged)
+(SETF (GET 'TCT-CHOP 'THEOREM)
+  '(THCONSE (KNIFE OBJ EV TIME)
+    (\#CHOP (THV KNIFE) (THV OBJ) (THV TIME))
+    (THOR (THAND (THGOAL (\#CHOP (THV EV) (THV KNIFE) (THV OBJ))) 
+                 (TIMECHK (THV EV) (THV TIME)))
+          (THGOAL (\#CHOP (THV EV) (THV KNIFE) (THV OBJ) (THV TIME)) 
+                  (THUSE TCTE-CHOP)))))
+
+(SETF (GET 'TCTE-CHOP 'THEOREM)
+  '(THCONSE (KNIFE OBJ EV EVENT TIME)
+    (\#CHOP (THV EV) (THV KNIFE) (THV OBJ) (THV TIME))
+    (THAMONG (THV EVENT) EVENTLIST)
+    (EQ (GET (THV EVENT) 'TYPE) '\#CHOP)
+    (TIMECHK (THV EVENT) (THV TIME))
+    (THGOAL (\#CHOP (THV EVENT) (THV KNIFE) (THV OBJ)))
+    (THVSETQ (THNV EV) (THV EVENT))))
+
+;; CHOOSE properties for #CHOP
+(SETF (GET '\#CHOP 'CHOOSE) 
+  '(((THGOAL (\#IS (THV *) \#KNIFE)))))
+
+(SETF (GET '\#CHOP 'CHOOSE2) 
+  '(((THGOAL (\#IS (THV *) \#ONION)) (THGOAL (\#CLEARTOP (THV *))))
+    ((THGOAL (\#IS (THV *) \#BELLPEPPER)) (THGOAL (\#CLEARTOP (THV *))))
+    ((THGOAL (\#IS (THV *) \#ONION)))
+    ((THGOAL (\#IS (THV *) \#BELLPEPPER)))))
+
+(THADD 'TC-CHOP NIL)
+
+(SETF (GET 'TC-ISCHOPPED 'THEOREM)
+  '(THCONSE (X) 
+    (\#IS (THV X) \#CHOPPED) 
+    (THSUCCEED)))
+
+(THADD 'TC-ISCHOPPED NIL)
+
 
 '(COMMANDS ARE\:
 		 \#CLEARTOP
 		 \#GET-RID-OF
 		 \#GRASP
 		 \#PACK
+		 \#CHOP
 		 \#PICKUP
 		 \#PUTIN
 		 \#PUTON

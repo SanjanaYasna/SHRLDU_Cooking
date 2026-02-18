@@ -195,6 +195,9 @@
 
 (DEFS BLUE SEMANTICS ((ADJ (\#COLOR \#BLUE))) FEATURES (ADJ))
 
+(DEFS PINK SEMANTICS ((ADJ (\#COLOR \#PINK))) FEATURES (ADJ))
+
+
 (DEFS BOTH 
     SEMANTICS ((DET 'DEF)) 
     FEATURES (B-SPECIAL QNTFR DET DEF NPL BOTH) 
@@ -425,6 +428,8 @@
 (DEFS GRAB 
     SEMANTICS ((VB ((TRANS (\#GRASP))))) 
     FEATURES (VB TRANS INF))
+
+;DEFS CHOP TODO
 
 (DEFS GRASP 
     SEMANTICS ((VB ((TRANS (\#GRASP))))) 
@@ -738,6 +743,27 @@
 							\:POT
 							*TIME)))))))))
     FEATURES (COMBINATION TRANS))
+
+; Following pickup command above:
+; AVOID calling #notice anywhere to not have mover call BLINK
+; but only passes 2/8 parses..... :(((((
+(DEFS CHOP 
+    ROOT (CHOP) 
+    SEMANTICS ((VB ((TRANS NIL)))
+               (TRANS
+		(RELATION 
+		    RESTRICTIONS\: (((\#ANIMATE)) ((\#PHYSOB))) 
+                    MARKERS\: (\#EVENT)
+		    PROCEDURE\: ((\#EVAL '(\#CHOP \:B10 \#2 *TIME))))))
+    FEATURES (VB TRANS INF))
+
+(DEFS \#CHOP 
+    THMLIST ((2. '((THUSE TC-2))) 
+             (3. '((THUSE TCT-CHOP)))) 
+    NAMEVENT (I3 (APPEND (LIST (VBFIX 'CHOP NIL))
+                         OBJ1
+                         (LIST 'WITH 'THE 'KNIFE))))
+
 
 (DEFS PLEASE FEATURES (B-SPECIAL) SEMANTICS T B-SPECIAL (FLUSHME))
 
@@ -1208,6 +1234,8 @@
 (DEFS \#BLACK SYS (\#SPECTRUM))
 
 (DEFS \#BLUE SYS (\#SPECTRUM))
+
+(DEFS \#PINK SYS (\#SPECTRUM))
 
 (DEFS \#BLUEPRINT 
     EXPR (LAMBDA (X) 
@@ -1834,6 +1862,7 @@ MARKERS\: (\#PLACE)
 (DEFLIST CONTRAST
 	 (RED \#COLOR)
 	 (BLUE \#COLOR)
+	 (PINK \#COLOR)
 	 (GREEN \#COLOR)
 	 (WHITE \#COLOR)
 	 (BLACK \#COLOR)
